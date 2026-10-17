@@ -1,0 +1,19 @@
+# Theseus policy for Meridian Ops.
+#
+# protectedPaths: a change that touches these ends the request as blocked.
+# allowedExtensionAreas: empty means the whole repository (minus protected
+#   paths) is open to feature agents.
+# validation: run from the repository root, in order, after every attempt.
+#   Each must exit 0 before a preview is started. The build is here on
+#   purpose: the preview serves .next/, so it must reflect the change.
+protectedPaths:
+  - Dockerfile
+  - .dockerignore
+  - .github
+allowedExtensionAreas: []
+validation:
+  - npm run typecheck
+  - npm run lint
+  - npm test
+  - npm run build
+approval: vendor

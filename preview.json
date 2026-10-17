@@ -1,0 +1,7 @@
+{
+  "stack": { "language": "typescript", "runtime": "nodejs" },
+  "setup": { "command": "npm ci && npm run build", "cwd": "." },
+  "start": { "command": "HOSTNAME=0.0.0.0 PORT=3000 npm start", "cwd": ".", "port": 3000 },
+  "readiness": { "httpPath": "/", "timeoutSeconds": 60 },
+  "customization": { "scoping": "none" }
+}
