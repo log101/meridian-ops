@@ -2,14 +2,15 @@
 
 import {
   BoxesIcon,
+  CompassIcon,
+  ContactIcon,
   FileTextIcon,
   LayoutDashboardIcon,
   ReceiptIcon,
   SettingsIcon,
   ShoppingCartIcon,
+  SparklesIcon,
   UsersIcon,
-  ContactIcon,
-  CompassIcon,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -32,6 +33,7 @@ const sections = [
     label: "Work",
     items: [
       { title: "Dashboard", href: "/", icon: LayoutDashboardIcon },
+      { title: "Welcome", href: "/welcome", icon: SparklesIcon },
       { title: "Orders", href: "/orders", icon: ShoppingCartIcon },
       { title: "Invoices", href: "/invoices", icon: FileTextIcon },
       { title: "Expenses", href: "/expenses", icon: ReceiptIcon },
