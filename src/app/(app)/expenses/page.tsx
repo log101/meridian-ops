@@ -8,6 +8,7 @@ import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { RejectExpenseDialog } from "@/components/forms/reject-expense-dialog";
 import { reviewExpenseAction } from "@/lib/actions";
 import { countPendingExpenses, listExpenses } from "@/lib/data/expenses";
 import { formatDate, formatMoney } from "@/lib/format";
@@ -60,7 +61,13 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Pro
                   <TableCell className="pl-4 font-medium">{e.staff_name}</TableCell>
                   <TableCell>
                     <div>{e.description}</div>
-                    {e.review_note ? <div className="text-xs text-muted-foreground">Note: {e.review_note}</div> : null}
+                    {e.status === "rejected" && (e.rejection_note || e.review_note) ? (
+                      <div className="text-xs text-muted-foreground">
+                        Rejection note: {e.rejection_note || e.review_note}
+                      </div>
+                    ) : e.review_note ? (
+                      <div className="text-xs text-muted-foreground">Note: {e.review_note}</div>
+                    ) : null}
                   </TableCell>
                   <TableCell className="capitalize text-muted-foreground">{e.category}</TableCell>
                   <TableCell className="text-muted-foreground">{formatDate(e.incurred_at)}</TableCell>
@@ -75,14 +82,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Pro
                         <ActionButton size="sm" action={reviewExpenseAction.bind(null, e.id, "approved", "")} success="Expense approved">
                           Approve
                         </ActionButton>
-                        <ActionButton
-                          size="sm"
-                          variant="outline"
-                          action={reviewExpenseAction.bind(null, e.id, "rejected", "")}
-                          success="Expense rejected"
-                        >
-                          Reject
-                        </ActionButton>
+                        <RejectExpenseDialog expenseId={e.id} description={e.description} />
                       </div>
                     ) : e.status === "pending" ? (
                       <span className="text-xs text-muted-foreground">Your claim</span>

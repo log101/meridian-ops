@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { addCustomerNote, createCustomer } from "@/lib/data/customers";
-import { reviewExpense, submitExpense } from "@/lib/data/expenses";
+import { rejectExpense, reviewExpense, submitExpense } from "@/lib/data/expenses";
 import { createInvoice, setInvoiceStatus } from "@/lib/data/invoices";
 import { createOrder, transitionOrder } from "@/lib/data/orders";
 import { adjustStock } from "@/lib/data/products";
@@ -161,6 +161,30 @@ export async function reviewExpenseAction(expenseId: number, decision: "approved
   try {
     const me = await currentUser();
     reviewExpense(expenseId, decision, me.id, note);
+    revalidatePath("/expenses");
+    revalidatePath("/");
+    return { ok: true };
+  } catch (e) {
+    return fail(e);
+  }
+}
+
+export async function rejectExpenseAction(
+  expenseId: number,
+  prevOrFdOrNote?: ActionResult | FormData | string,
+  maybeFd?: FormData,
+): Promise<ActionResult> {
+  try {
+    const me = await currentUser();
+    let note = "";
+    if (typeof prevOrFdOrNote === "string") {
+      note = prevOrFdOrNote;
+    } else if (prevOrFdOrNote instanceof FormData) {
+      note = str(prevOrFdOrNote, "note") || str(prevOrFdOrNote, "rejection_note");
+    } else if (maybeFd instanceof FormData) {
+      note = str(maybeFd, "note") || str(maybeFd, "rejection_note");
+    }
+    rejectExpense(expenseId, me.id, note);
     revalidatePath("/expenses");
     revalidatePath("/");
     return { ok: true };

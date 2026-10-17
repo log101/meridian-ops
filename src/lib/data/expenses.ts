@@ -62,8 +62,33 @@ export function reviewExpense(id: number, decision: "approved" | "rejected", rev
   if (!e) throw new Error("Expense not found");
   if (e.status !== "pending") throw new Error(`Expense was already ${e.status}`);
   if (e.staff_id === reviewerId) throw new Error("You cannot review your own expense");
-  q("UPDATE expenses SET status = ?, reviewed_by = ?, reviewed_at = ?, review_note = ? WHERE id = ?")
-    .run(decision, reviewerId, nowIso(), note.trim(), id);
+  if (decision === "rejected" && !note.trim()) {
+    throw new Error("Provide a note explaining the rejection");
+  }
+  const rejectionNote = decision === "rejected" ? note.trim() : null;
+  const reviewNote = note.trim();
+  q("UPDATE expenses SET status = ?, reviewed_by = ?, reviewed_at = ?, review_note = ?, rejection_note = ? WHERE id = ?")
+    .run(decision, reviewerId, nowIso(), reviewNote, rejectionNote, id);
   recordActivity(reviewerId, "expense", e.description, "/expenses", `${decision} ${e.staff_name}'s expense`);
   return getExpense(id)!;
 }
+
+export function rejectExpense(id: number, reviewerId: number, note: string): Expense;
+export function rejectExpense(id: number, note: string, reviewerId?: number): Expense;
+export function rejectExpense(
+  id: number,
+  reviewerIdOrNote: number | string,
+  noteOrReviewerId?: string | number,
+): Expense {
+  let reviewerId: number;
+  let note: string;
+  if (typeof reviewerIdOrNote === "number") {
+    reviewerId = reviewerIdOrNote;
+    note = typeof noteOrReviewerId === "string" ? noteOrReviewerId : "";
+  } else {
+    note = reviewerIdOrNote;
+    reviewerId = typeof noteOrReviewerId === "number" ? noteOrReviewerId : 0;
+  }
+  return reviewExpense(id, "rejected", reviewerId, note);
+}
+
