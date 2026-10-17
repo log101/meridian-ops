@@ -173,8 +173,8 @@ export function seed(db: DatabaseSync): void {
 
   // Expense claims: some pending, some already reviewed.
   const insExpense = db.prepare(
-    `INSERT INTO expenses (staff_id, category, description, amount_cents, incurred_at, status, submitted_at, reviewed_by, reviewed_at, review_note)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO expenses (staff_id, category, description, amount_cents, incurred_at, status, submitted_at, reviewed_by, reviewed_at, review_note, rejection_note)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
   );
   const expenses: [number, string, string, number, number, "pending" | "approved" | "rejected", string][] = [
     [3, "travel", "Train to Seattle for Northgate quarterly review", 8600, 3, "pending", ""],
@@ -194,7 +194,19 @@ export function seed(db: DatabaseSync): void {
     const incurred = daysAgo(ageDays + 1);
     const submitted = daysAgo(ageDays);
     const reviewed = status === "pending" ? null : daysAgo(Math.max(ageDays - 2, 0));
-    insExpense.run(staffId, cat, desc, amount, incurred, status, submitted, status === "pending" ? null : 2, reviewed, note);
+    insExpense.run(
+      staffId,
+      cat,
+      desc,
+      amount,
+      incurred,
+      status,
+      submitted,
+      status === "pending" ? null : 2,
+      reviewed,
+      note,
+      status === "rejected" ? note : null,
+    );
     insActivity.run(staffId, "expense", desc, "/expenses", `submitted a ${cat} expense`, submitted);
   }
 

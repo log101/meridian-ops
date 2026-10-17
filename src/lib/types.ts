@@ -106,6 +106,7 @@ export type Expense = {
   reviewed_by_name: string | null;
   reviewed_at: string | null;
   review_note: string;
+  rejection_note: string | null;
 };
 
 export type Activity = {
