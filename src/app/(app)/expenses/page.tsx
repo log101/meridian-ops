@@ -6,10 +6,10 @@ import { FilterTabs } from "@/components/filter-tabs";
 import { PageHeader } from "@/components/page-header";
 import { StatusBadge } from "@/components/status-badge";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import { Card, CardFooter } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { reviewExpenseAction } from "@/lib/actions";
-import { countPendingExpenses, listExpenses } from "@/lib/data/expenses";
+import { countPendingExpenses, listExpenses, summarizeExpenses } from "@/lib/data/expenses";
 import { formatDate, formatMoney } from "@/lib/format";
 import { currentUser } from "@/lib/session";
 import { EXPENSE_STATUSES, type ExpenseStatus } from "@/lib/types";
@@ -19,7 +19,11 @@ export const metadata = { title: "Expenses" };
 export default async function ExpensesPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { status: raw = "all" } = await searchParams;
   const status = (EXPENSE_STATUSES as readonly string[]).includes(raw) ? (raw as ExpenseStatus) : "all";
-  const [me, expenses] = await Promise.all([currentUser(), listExpenses({ status })]);
+  const [me, expenses, summary] = await Promise.all([
+    currentUser(),
+    listExpenses({ status }),
+    summarizeExpenses({ status }),
+  ]);
   const pending = countPendingExpenses();
 
   return (
@@ -41,7 +45,7 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Pro
       {expenses.length === 0 ? (
         <EmptyState title="No expenses here" />
       ) : (
-        <Card className="py-0">
+        <Card className="gap-0 py-0">
           <Table>
             <TableHeader>
               <TableRow>
@@ -92,6 +96,9 @@ export default async function ExpensesPage({ searchParams }: { searchParams: Pro
               ))}
             </TableBody>
           </Table>
+          <CardFooter className="border-t px-4 py-3 text-sm text-muted-foreground">
+            {summary.count} claim{summary.count === 1 ? "" : "s"} and {formatMoney(summary.total_cents)}
+          </CardFooter>
         </Card>
       )}
     </>
