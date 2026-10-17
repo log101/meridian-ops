@@ -32,9 +32,31 @@ export function getExpense(id: number): Expense | null {
 }
 
 export function countPendingExpenses(): { count: number; total_cents: number } {
-  return q("SELECT COUNT(*) AS count, COALESCE(SUM(amount_cents), 0) AS total_cents FROM expenses WHERE status = 'pending'")
-    .get() as { count: number; total_cents: number };
+  return summarizeExpenses({ status: "pending" });
 }
+
+export function summarizeExpenses(
+  filter: { status?: ExpenseStatus | "all"; staffId?: number } | ExpenseStatus | "all" = {},
+): { count: number; total_cents: number } {
+  const normalized = typeof filter === "string" ? { status: filter } : filter;
+  const where: string[] = [];
+  const args: (string | number)[] = [];
+  if (normalized.status && normalized.status !== "all") {
+    where.push("status = ?");
+    args.push(normalized.status);
+  }
+  if (normalized.staffId) {
+    where.push("staff_id = ?");
+    args.push(normalized.staffId);
+  }
+  const row = q(
+    `SELECT COUNT(*) AS count, COALESCE(SUM(amount_cents), 0) AS total_cents FROM expenses${where.length ? " WHERE " + where.join(" AND ") : ""}`,
+  ).get(...args) as { count: number; total_cents: number };
+  return { count: Number(row.count), total_cents: Number(row.total_cents) };
+}
+
+export const getExpensesSummary = summarizeExpenses;
+export const countExpenses = summarizeExpenses;
 
 export function submitExpense(input: {
   staffId: number;
