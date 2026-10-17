@@ -28,7 +28,21 @@ npm run typecheck && npm run lint && npm test && npm run build
 Docker: `docker build -t meridian-ops .` then
 `docker run -p 3000:3000 meridian-ops`. Pass
 `--build-arg NEXT_PUBLIC_THESEUS_URL=https://...` to show the
-"Request a change" button.
+"Request a change" button as a link.
+
+With these runtime variables set, the button instead opens a small box that
+lists earlier requests and files new ones through the Theseus API (server
+actions in `src/lib/actions/theseus.ts`; the key never reaches the browser).
+Each request links to its page in Theseus.
+
+| Variable | Value |
+|---|---|
+| `THESEUS_API_URL` | Theseus API base, e.g. `http://api:8080` |
+| `THESEUS_WEB_URL` | Theseus dashboard origin, e.g. `https://theseus.sh` (links, and the Origin the API trusts) |
+| `THESEUS_INTEGRATION_KEY` | The vendor's integration key |
+| `THESEUS_PRODUCT_ID`, `THESEUS_TENANT_ID`, `THESEUS_USER_ID` | The customer scope requests are filed as |
+| `THESEUS_ENTITLEMENT` | Optional, default `customize` |
+| `THESEUS_DEMO_LOGIN` | `true` makes links go through the shared demo login |
 
 ## How it is built
 
