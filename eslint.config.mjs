@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Theseus checks the repo out into the sandbox's home directory, which
+    // also holds the sandbox runtime's own files. Never lint those.
+    ".ascii/**",
+    ".pi/**",
+    "data/**",
   ]),
 ]);
 
