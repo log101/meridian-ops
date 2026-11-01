@@ -67,3 +67,28 @@ export function reviewExpense(id: number, decision: "approved" | "rejected", rev
   recordActivity(reviewerId, "expense", e.description, "/expenses", `${decision} ${e.staff_name}'s expense`);
   return getExpense(id)!;
 }
+
+export function aggregateSelectedExpenses(
+  claims: Array<{ id: number; amount_cents: number }>,
+  selectedIds?: Iterable<number>,
+): { count: number; total_cents: number } {
+  if (!selectedIds) {
+    const total_cents = claims.reduce((sum, c) => sum + (c.amount_cents || 0), 0);
+    return { count: claims.length, total_cents };
+  }
+  const selectedSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
+  let count = 0;
+  let total_cents = 0;
+  for (const claim of claims) {
+    if (selectedSet.has(claim.id)) {
+      count += 1;
+      total_cents += claim.amount_cents;
+    }
+  }
+  return { count, total_cents };
+}
+
+export const calculateSelectedExpenses = aggregateSelectedExpenses;
+export const calculateSelectedExpenseTotals = aggregateSelectedExpenses;
+export const aggregateExpenseClaims = aggregateSelectedExpenses;
+
