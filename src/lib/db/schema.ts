@@ -109,4 +109,6 @@ CREATE INDEX IF NOT EXISTS idx_activity_created ON activity(created_at);
 `;
 
 // Ordered, one-off statements for databases created by an earlier schema.
-export const migrations: string[] = [];
+export const migrations: string[] = [
+  "ALTER TABLE expenses ADD COLUMN rejection_note TEXT;",
+];
